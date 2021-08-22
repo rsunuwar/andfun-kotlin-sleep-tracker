@@ -17,15 +17,15 @@
 package com.example.android.trackmysleepquality.sleeptracker
 
 import android.app.Application
-import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
+import androidx.lifecycle.viewModelScope
 import com.example.android.trackmysleepquality.database.SleepDatabaseDao
 import com.example.android.trackmysleepquality.database.SleepNight
 import com.example.android.trackmysleepquality.formatNights
-import kotlinx.coroutines.*
+import kotlinx.coroutines.launch
 
 /**
  * ViewModel for SleepTrackerFragment.
@@ -47,11 +47,29 @@ class SleepTrackerViewModel(
 
     //TODO (02)  Create three corresponding state variables. Assign them a Transformations
     //that tests it against the value of tonight.
+    val startButtonVisible = Transformations.map(tonight) {
+        it == null
+    }
+
+    val stopButtonVisible = Transformations.map(tonight) {
+        it != null
+    }
+
+    val clearButtonVisible = Transformations.map(nights) {
+        it.isNotEmpty()
+    }
 
     //TODO (03) Verify app build and runs without errors.
 
     //TODO (04) Using the familiar pattern, create encapsulated showSnackBarEvent variable
     //and doneShowingSnackbar() fuction.
+    private val _showSnackBarEvent = MutableLiveData<Boolean>()
+    val showSnackbar: LiveData<Boolean>
+        get() = _showSnackBarEvent
+
+    fun doneShowingSnackbar() {
+        _showSnackBarEvent.value = false
+    }
 
     //TODO (06) In onClear(), set the value of _showOnSnackbarEvent to true.
 
@@ -162,6 +180,7 @@ class SleepTrackerViewModel(
 
             // And clear tonight since it's no longer in the database
             tonight.value = null
+            _showSnackBarEvent.value = true
         }
     }
 
